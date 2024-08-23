@@ -1,6 +1,4 @@
-﻿using OpenTK;
-using OpenTK.Graphics;
-using OpenTK.Windowing.Common;
+﻿using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System.Numerics;
@@ -9,23 +7,28 @@ class Game : GameWindow
 {
     private Renderer _renderer;
     private Objeto _miFigura;
+    private Objeto _referencia;
 
     private Vector3 _movementX = new Vector3(0.001f, 0.0f, 0.0f); // Movimiento en el eje X
     private Vector3 _movementY = new Vector3(0.0f, 0.001f, 0.0f); // Movimiento en el eje Y
-
+    private Vector3 _posicionRelativa = new Vector3(0.0f, 0.0f, 0.0f); // Posicion Relativa
 
     public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
         : base(gameWindowSettings, nativeWindowSettings)
     {
         _renderer = new Renderer();
         _miFigura = new Objeto();
+        _referencia = new Objeto();
     }
 
     protected override void OnLoad()
     {
         base.OnLoad();
         _renderer.Initialize(_miFigura);
-    } 
+
+        _referencia.EstablecerPosicion(new Vector3(0.0f, 0.0f, 0.0f));
+        _miFigura.Trasladar(_referencia.ObtenerPosicion() + _posicionRelativa);
+    }
 
     protected override void OnRenderFrame(FrameEventArgs args)
     {

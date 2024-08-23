@@ -75,11 +75,11 @@ public class Objeto
     // metodo para trasladar la figura a una nueva posicion
     public void Trasladar(Vector3 desplazamiento)
     {
-        for (int i = 0; i < vertices.Count; i++)
-        {
-            vertices[i] += desplazamiento;
-        }
-        //_posicion += desplazamiento;
+        //for (int i = 0; i < vertices.Count; i++)
+        //{
+        //    vertices[i] += desplazamiento;
+        //}
+        _posicion += desplazamiento;
     }
 
     public List<Vector3> ObtenerVerticesTransformados()
@@ -91,6 +91,11 @@ public class Objeto
             verticesTransformados.Add(vertice - _centro + _posicion);
         }
         return verticesTransformados;
+    }
+
+    public void EstablecerPosicion(Vector3 newPosicion)
+    {
+        _posicion = newPosicion;
     }
 
 
