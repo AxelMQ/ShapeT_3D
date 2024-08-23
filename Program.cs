@@ -9,7 +9,7 @@ class Program
         var gameWindowSetting = GameWindowSettings.Default;
         var nativeWindowSettings = new NativeWindowSettings()
         {
-            ClientSize = new Vector2i(500, 500),
+            ClientSize = new Vector2i(900, 600),
             Title = "OpenTK T Shape",
             WindowState = WindowState.Normal
         };

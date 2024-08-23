@@ -12,91 +12,54 @@ class Renderer
     private Matrix4 _viewMatrix;
     private Matrix4 _modelMatrix;
 
-    public void Initialize()
+    private int _indexCount;
+
+    public void Initialize(Objeto figura)
     {
         GL.ClearColor(Color4.CornflowerBlue);
         GL.Enable(EnableCap.DepthTest);
 
         // Definir las matrices de perspectiva y vista
-        _projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(15f), (float)800 / 600, 0.1f, 100f);
-        _viewMatrix = CreateViewMatrix(new Vector3(3f, 2f, 3f), Vector3.Zero, Vector3.UnitY);
+        _projectionMatrix = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(25f), (float)900/600, 0.1f, 500f);
+        _viewMatrix = CreateViewMatrix(new Vector3(5f, 5f, 5f), Vector3.Zero, Vector3.UnitY);
         _modelMatrix = Matrix4.Identity;
 
         // Cargar y usar shaders
         _shaderProgram = LoadShaders("vertex_shader.glsl", "fragment_shader.glsl");
         GL.UseProgram(_shaderProgram);
 
-        float[] vertices = {
-            // Barra horizontal (superior) - Cara frontal (roja)
-            -0.3f,  0.2f,  0.0f,   1.0f, 0.0f, 0.0f,  // V0 - Frente Izquierda (Rojo)
-             0.3f,  0.2f,  0.0f,   1.0f, 0.0f, 0.0f,  // V1 - Frente Derecha (Rojo)
-            -0.3f,  0.0f,  0.0f,   1.0f, 0.0f, 0.0f,  // V2 - Frente Izquierda abajo (Rojo)
-             0.3f,  0.0f,  0.0f,   1.0f, 0.0f, 0.0f,  // V3 - Frente Derecha abajo (Rojo)
+        var vertices = figura.ObtenerVertices().ToArray();
+        var indices = figura.ObtenerIndices().ToArray();
 
-            // Barra horizontal (superior) - Cara trasera (verde)
-            -0.3f,  0.2f, -0.1f,   0.0f, 1.0f, 0.0f,  // V4 - Atrás Izquierda (Verde)
-             0.3f,  0.2f, -0.1f,   0.0f, 1.0f, 0.0f,  // V5 - Atrás Derecha (Verde)
-            -0.3f,  0.0f, -0.1f,   0.0f, 1.0f, 0.0f,  // V6 - Atrás Izquierda abajo (Verde)
-             0.3f,  0.0f, -0.1f,   0.0f, 1.0f, 0.0f,  // V7 - Atrás Derecha abajo (Verde)
+        // Almacenar la longitud de los índices
+        _indexCount = indices.Length;
 
-
-            // Barra vertical (inferior) - Cara frontal (azul)
-            -0.08f,  0.0f,  0.0f,  0.0f, 0.0f, 1.0f,  // V8 - Frente Izquierda (Azul)
-             0.08f,  0.0f,  0.0f,  0.0f, 0.0f, 1.0f,  // V9 - Frente Derecha (Azul)
-            -0.08f, -0.6f,  0.0f,  0.0f, 0.0f, 1.0f,  // V10 - Frente Izquierda abajo (Azul)
-             0.08f, -0.6f,  0.0f,  0.0f, 0.0f, 1.0f,  // V11 - Frente Derecha abajo (Azul)
-
-            // Barra vertical (inferior) - Cara trasera (amarilla)
-            -0.08f,  0.0f, -0.1f,  1.0f, 1.0f, 0.0f,  // V12 - Atrás Izquierda (Amarillo)
-             0.08f,  0.0f, -0.1f,  1.0f, 1.0f, 0.0f,  // V13 - Atrás Derecha (Amarillo)
-            -0.08f, -0.6f, -0.1f,  1.0f, 1.0f, 0.0f,  // V14 - Atrás Izquierda abajo (Amarillo)
-             0.08f, -0.6f, -0.1f,  1.0f, 1.0f, 0.0f,  // V15 - Atrás Derecha abajo (Amarillo)
-        };
-
-        uint[] indices = {
-            // Barra horizontal (superior)
-            0, 1, 2, 2, 1, 3, // Frente
-            4, 5, 6, 6, 5, 7, // Atrás
-            0, 2, 4, 4, 2, 6, // Izquierda
-            1, 3, 5, 5, 3, 7, // Derecha
-            0, 1, 4, 4, 1, 5, // Parte superior
-            2, 3, 6, 6, 3, 7, // Parte inferior
-
-            // Barra vertical (inferior)
-            8, 9, 10, 10, 9, 11, // Frente
-            12, 13, 14, 14, 13, 15, // Atrás
-            8, 10, 12, 12, 10, 14, // Izquierda
-            9, 11, 13, 13, 11, 15, // Derecha
-            8, 9, 12, 12, 9, 13, // Parte superior
-            10, 11, 14, 14, 11, 15, // Parte inferior
-        };
-
-
+        // Configuración de buffers
         _vertexArray = GL.GenVertexArray();
-        _vertexBuffer = GL.GenBuffer();
-        _elementBuffer = GL.GenBuffer();
-
         GL.BindVertexArray(_vertexArray);
 
+        _vertexBuffer = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
-        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * Vector3.SizeInBytes, vertices, BufferUsageHint.StaticDraw);
 
+        _elementBuffer = GL.GenBuffer();
         GL.BindBuffer(BufferTarget.ElementArrayBuffer, _elementBuffer);
-        GL.BufferData(BufferTarget.ElementArrayBuffer, indices.Length * sizeof(uint), indices, BufferUsageHint.StaticDraw);
+        GL.BufferData(BufferTarget.ElementArrayBuffer, _indexCount * sizeof(uint), indices, BufferUsageHint.StaticDraw);
 
-        //GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-        //GL.EnableVertexAttribArray(0);
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 0);
-        GL.EnableVertexAttribArray(0);
+        int vertexLocation = GL.GetAttribLocation(_shaderProgram, "aPosition");
+        GL.EnableVertexAttribArray(vertexLocation);
+        GL.VertexAttribPointer(vertexLocation, 3, VertexAttribPointerType.Float, false, Vector3.SizeInBytes, 0);
 
-        GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
-        GL.EnableVertexAttribArray(1);
+        // Asumiendo que el color está en otro buffer, esto se puede ajustar como sea necesario.
+        //int colorLocation = GL.GetAttribLocation(_shaderProgram, "aColor");
+        //GL.EnableVertexAttribArray(colorLocation);
+        //GL.VertexAttribPointer(colorLocation, 3, VertexAttribPointerType.Float, false, 6 * sizeof(float), 3 * sizeof(float));
 
-        //GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-        //GL.BindVertexArray(0);
+        GL.BindVertexArray(0); // Desvincular el VAO
+
     }
 
-    public void Render()
+    public void Render(Objeto figura)
     {
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -107,9 +70,12 @@ class Renderer
         GL.UniformMatrix4(GL.GetUniformLocation(_shaderProgram, "view"), false, ref _viewMatrix);
         GL.UniformMatrix4(GL.GetUniformLocation(_shaderProgram, "model"), false, ref _modelMatrix);
 
-
         GL.BindVertexArray(_vertexArray);
-        GL.DrawElements(PrimitiveType.Triangles, 6 * 12, DrawElementsType.UnsignedInt, 0); // Dibujar todas las caras
+        var verticesTransformados = figura.ObtenerVerticesTransformados().ToArray();
+        GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBuffer);
+        GL.BufferData(BufferTarget.ArrayBuffer, verticesTransformados.Length * Vector3.SizeInBytes, verticesTransformados, BufferUsageHint.StaticDraw);
+        GL.DrawElements(PrimitiveType.Triangles, _indexCount, DrawElementsType.UnsignedInt, 0); 
+
     }
 
     private int LoadShaders(string vertexPath, string fragmentPath)
@@ -120,20 +86,44 @@ class Renderer
         int vertexShader = GL.CreateShader(ShaderType.VertexShader);
         GL.ShaderSource(vertexShader, vertexCode);
         GL.CompileShader(vertexShader);
+        CheckShaderCompileErrors(vertexShader, "VERTEX");
 
         int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
         GL.ShaderSource(fragmentShader, fragmentCode);
         GL.CompileShader(fragmentShader);
+        CheckShaderCompileErrors(fragmentShader, "FRAGMENT");
+
 
         int shaderProgram = GL.CreateProgram();
         GL.AttachShader(shaderProgram, vertexShader);
         GL.AttachShader(shaderProgram, fragmentShader);
         GL.LinkProgram(shaderProgram);
+        CheckShaderLinkErrors(shaderProgram);
 
         GL.DeleteShader(vertexShader);
         GL.DeleteShader(fragmentShader);
 
         return shaderProgram;
+    }
+
+    private void CheckShaderCompileErrors(int shader, string type)
+    {
+        GL.GetShader(shader, ShaderParameter.CompileStatus, out int success);
+        if (success == 0)
+        {
+            string infoLog = GL.GetShaderInfoLog(shader);
+            Console.WriteLine($"ERROR::SHADER_COMPILATION_ERROR of type: {type}\n{infoLog}\n");
+        }
+    }
+
+    private void CheckShaderLinkErrors(int program)
+    {
+        GL.GetProgram(program, GetProgramParameterName.LinkStatus, out int success);
+        if (success == 0)
+        {
+            string infoLog = GL.GetProgramInfoLog(program);
+            Console.WriteLine($"ERROR::PROGRAM_LINKING_ERROR of type: PROGRAM\n{infoLog}\n");
+        }
     }
 
     private Matrix4 CreateViewMatrix(Vector3 eye, Vector3 center, Vector3 up)
@@ -150,6 +140,7 @@ class Renderer
         );
 
         return viewMatrix;
+        //return Matrix4.LookAt(eye, center, up);
     }
 
 }
