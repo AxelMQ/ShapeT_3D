@@ -1,18 +1,23 @@
-﻿using System.Numerics;
+﻿using OpenTK.Mathematics;
 
 public class Objeto
 {
     private readonly List<Vector3> vertices;
+    private readonly List<Vector3> colors;
     private readonly List<uint> indices;
     private Vector3 _posicion;
     private Vector3 _centro;
+    private Matrix4 _rotacion;
 
     public Objeto()
     {
         vertices = new List<Vector3>();
+        colors = new List<Vector3>();
         indices = new List<uint>();
         _posicion = Vector3.Zero;
+        _rotacion = Matrix4.Identity;
         DefinirVertices();
+        DefinirColores();
         _centro = CalcularCentro();
         
     } 
@@ -62,6 +67,29 @@ public class Objeto
         });
     }
 
+    public void DefinirColores()
+    {
+        // Definir un color para cada vértice
+        colors.AddRange(new Vector3[] {
+            new Vector3(1.0f, 0.0f, 0.0f), // Rojo
+            new Vector3(0.0f, 1.0f, 0.0f), // Verde
+            new Vector3(0.0f, 0.0f, 1.0f), // Azul
+            new Vector3(1.0f, 1.0f, 0.0f), // Amarillo
+            new Vector3(1.0f, 0.0f, 1.0f), // Magenta
+            new Vector3(0.0f, 1.0f, 1.0f), // Cian
+            new Vector3(1.0f, 0.5f, 0.0f), // Naranja
+            new Vector3(0.5f, 0.0f, 1.0f), // Púrpura
+            new Vector3(1.0f, 0.0f, 0.0f), // Rojo
+            new Vector3(0.0f, 1.0f, 0.0f), // Verde
+            new Vector3(0.0f, 0.0f, 1.0f), // Azul
+            new Vector3(1.0f, 1.0f, 0.0f), // Amarillo
+            new Vector3(1.0f, 0.0f, 1.0f), // Magenta
+            new Vector3(0.0f, 1.0f, 1.0f), // Cian
+            new Vector3(1.0f, 0.5f, 0.0f), // Naranja
+            new Vector3(0.5f, 0.0f, 1.0f), // Púrpura
+        });
+    }
+
     private Vector3 CalcularCentro()
     {
         Vector3 suma = Vector3.Zero;
@@ -82,13 +110,29 @@ public class Objeto
         _posicion += desplazamiento;
     }
 
+    public void Rotar(Vector3 angulos)
+    {
+        Matrix4 rotX = Matrix4.CreateRotationX(angulos.X);
+        Matrix4 rotY = Matrix4.CreateRotationY(angulos.Y);
+        Matrix4 rotZ = Matrix4.CreateRotationZ(angulos.Z);
+
+        // Combinar las rotaciones
+        _rotacion *= rotX * rotY * rotZ;
+    }
+    public Matrix4 ObtenerMatrizTransformacion()
+    {
+        return _rotacion * Matrix4.CreateTranslation(_posicion);
+    }
+
     public List<Vector3> ObtenerVerticesTransformados()
     {
         var verticesTransformados = new List<Vector3>();
         foreach (var vertice in vertices)
         {
             // Trasladar respecto al nuevo centro y la posición
-            verticesTransformados.Add(vertice - _centro + _posicion);
+            var verticeEnCentro = vertice - _centro;
+            var verticeConRotacion = Vector3.TransformPerspective(verticeEnCentro, _rotacion);
+            verticesTransformados.Add(verticeConRotacion + _posicion);
         }
         return verticesTransformados;
     }
@@ -98,7 +142,7 @@ public class Objeto
         _posicion = newPosicion;
     }
 
-
+    public List<Vector3> ObtenerColores() => colors;
     public List<Vector3> ObtenerVertices() => vertices;
     public List<uint> ObtenerIndices() => indices;
     public Vector3 ObtenerPosicion() => _posicion;

@@ -1,7 +1,8 @@
-﻿using OpenTK.Windowing.Common;
+﻿using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-using System.Numerics;
+
 
 class Game : GameWindow
 {
@@ -12,6 +13,8 @@ class Game : GameWindow
     private Vector3 _movementX = new Vector3(0.001f, 0.0f, 0.0f); // Movimiento en el eje X
     private Vector3 _movementY = new Vector3(0.0f, 0.001f, 0.0f); // Movimiento en el eje Y
     private Vector3 _posicionRelativa = new Vector3(0.0f, 0.0f, 0.0f); // Posicion Relativa
+    private Vector3 _rotationSpeedY = new Vector3(0.0f, 0.001f, 0.0f); // Rotacion eje Y
+    private Vector3 _rotationSpeedX = new Vector3(0.001f, 0.0f, 0.0f); // Rotacion eje X
 
     public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
         : base(gameWindowSettings, nativeWindowSettings)
@@ -59,5 +62,24 @@ class Game : GameWindow
             _miFigura.Trasladar(-_movementY);
         }
 
+        // Rotación relativa usando las teclas A y D
+        if (KeyboardState.IsKeyDown(Keys.A))
+        {
+            _miFigura.Rotar(_rotationSpeedY);
+        }
+        if (KeyboardState.IsKeyDown(Keys.D))
+        {
+            _miFigura.Rotar(-_rotationSpeedY);
+        }
+
+        // Rotación sobre el eje X usando las teclas W y S
+        if (KeyboardState.IsKeyDown(Keys.W))
+        {
+            _miFigura.Rotar(_rotationSpeedX);
+        }
+        if (KeyboardState.IsKeyDown(Keys.S))
+        {
+            _miFigura.Rotar(-_rotationSpeedX);
+        }
     }
 }
